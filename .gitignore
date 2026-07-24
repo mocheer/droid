@@ -1,0 +1,18 @@
+# Build and Release Folders
+*.exe
+# air tmp
+tmp
+docs
+# vendor
+vendor
+public
+config
+# 
+data
+log
+
+# 
+go.work
+go.work.sum
+# 
+tmp.go
