@@ -4,8 +4,8 @@ github.com/disintegration/imaging v1.6.2 h1:w1LecBlG2Lnp8B3jk5zSuNqd7b4DXhcjwek1
 github.com/disintegration/imaging v1.6.2/go.mod h1:44/5580QXChDfwIclfc/PCwrr44amcmDAg8hxG0Ewe4=
 github.com/matoous/go-nanoid/v2 v2.1.0 h1:P64+dmq21hhWdtvZfEAofnvJULaRR1Yib0+PnU669bE=
 github.com/matoous/go-nanoid/v2 v2.1.0/go.mod h1:KlbGNQ+FhrUNIHUxZdL63t7tl4LaPkZNpUULS8H4uVM=
-github.com/mocheer/pluto v0.0.0-20250417063410-affaeb367fe5 h1:zTHsJMAmSwBLPr5kPKWOcNRxhzy9FW2iJU8N6rdVk/I=
-github.com/mocheer/pluto v0.0.0-20250417063410-affaeb367fe5/go.mod h1:uy9nzCfcEV7Xj6LidhNP3AsKvCEKdIaTlqppPcX8/Ls=
+github.com/mocheer/pluto v1.2.1 h1:3cgX+XvaT7d1co7tGyhFC4xH4iQuk1/MKRyM4uMb+LY=
+github.com/mocheer/pluto v1.2.1/go.mod h1:ZYsWHoT8h+IDYj+YwnFgdAXcG9LrRHR4pr8VroFX9xQ=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/testify v1.11.1 h1:7s2iGBzp5EwR7/aIZr8ao5+dra3wiQyKjjFuvgVKu7U=
