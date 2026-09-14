@@ -4,7 +4,7 @@ import (
 	"log"
 	"slices"
 
-	"github.com/mocheer/droid/gadb"
+	"github.com/mocheer/droid/pkg/gadb"
 )
 
 type Droid struct {
@@ -67,7 +67,7 @@ func (m *Droid) Run(options DroidRunOptions) {
 }
 
 // Stop
-func (m *Droid) Stop(options DroidRunOptions) {
+func (m *Droid) Stop() {
 	for _, vm := range m.vms {
 		vm.Stop()
 	}

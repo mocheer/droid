@@ -4,8 +4,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/mocheer/droid/gadb"
-	"github.com/mocheer/pluto/pkg/ts/clock"
+	"github.com/mocheer/droid/pkg/gadb"
+	"github.com/mocheer/pluto/pkg/clock"
 )
 
 type Vm struct {
