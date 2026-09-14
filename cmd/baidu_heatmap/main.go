@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/mocheer/droid/gadb"
-	"github.com/mocheer/pluto/pkg/ts/img"
+	"github.com/mocheer/pluto/pkg/img"
 )
 
 func main() {
