@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mocheer/droid"
+	"github.com/mocheer/droid/cmd/droid"
 )
 
 func Test(t *testing.T) {

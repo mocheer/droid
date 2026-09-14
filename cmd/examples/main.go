@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/mocheer/droid/gadb"
+	"github.com/mocheer/droid/pkg/gadb"
 )
 
 func main() {

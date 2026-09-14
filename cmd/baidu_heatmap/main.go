@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/mocheer/droid/gadb"
+	"github.com/mocheer/droid/pkg/gadb"
 	"github.com/mocheer/pluto/pkg/img"
 )
 
