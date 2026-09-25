@@ -9,7 +9,7 @@ import (
 
 func Test(t *testing.T) {
 	d := droid.New()
-	d.Run(droid.DroidRunOptions{
+	d.RunWithOptions(droid.DroidRunOptions{
 		Name:         "baidu_heatmap",
 		AppName:      "com.demo.istrongheapmap",
 		ActivityName: ".ListenActivity",

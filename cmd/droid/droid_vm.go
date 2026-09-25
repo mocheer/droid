@@ -12,7 +12,6 @@ type Vm struct {
 	device      gadb.Device
 	options     DroidRunOptions
 	cancelFuncs []func()
-	startFunc   func()
 	stopFunc    func()
 	isRuning    bool
 }
@@ -41,38 +40,38 @@ var NewDroidRunOptions = func(name string, appName string, activityName string) 
 	}
 }
 
-func (m *Vm) Run() {
-	t := time.Now().Unix()
+func (m *Vm) StartActivity() {
+	_, err := m.device.StartWithActivity(m.options.AppName, m.options.ActivityName)
+	if err != nil {
+		log.Println("启动失败", err)
+		return
+	}
+	m.isRuning = true
+}
+
+// 有些应用为了防止请求阻塞和卡顿问题需要间隔重启
+func (m *Vm) StopActivity() {
+	m.device.StopAndClear(m.options.AppName)
+	m.isRuning = false
+	// t2 := time.Now().Unix()
+}
+
+func (m *Vm) running() {
+	// t := time.Now().Unix()
 	device := m.device
 	//
 	m.cancelFuncs = []func(){}
-	m.startFunc = func() {
-		_, err := device.StartWithActivity(m.options.AppName, m.options.ActivityName)
-		if err != nil {
-			log.Println("启动失败", err)
-			return
-		}
-		m.isRuning = true
-		// log.Println("启动信息", result)
-	}
 	// 应用守护，防止因为崩溃等各种原因导致的应用关闭
 	if m.options.KeepAlive {
 		if m.options.RestartInterval == 0 {
 			m.options.RestartInterval = 5000 * time.Millisecond
 		}
 		cancel := clock.SetInterval(func() {
-			log.Println("启动应用", m.options.AppName)
-			m.startFunc()
+			m.StartActivity()
 		}, m.options.RestartInterval, true)
 		m.cancelFuncs = append(m.cancelFuncs, cancel)
 	}
-	// 有些应用为了防止请求阻塞和卡顿问题需要间隔重启
-	m.stopFunc = func() {
-		device.StopAndClear(m.options.AppName)
-		m.isRuning = false
-		t2 := time.Now().Unix()
-		log.Println("应用已关闭，运行时间为：", m.options.AppName, t2-t)
-	}
+
 	if m.options.StopInterval > 0 {
 		cancel := clock.SetInterval(func() {
 			log.Println("关闭应用", m.options.AppName)
@@ -105,6 +104,8 @@ func (m *Vm) Run() {
 	}
 }
 
+// Stop
+// 停止应用
 func (m *Vm) Stop() {
 	for _, cancel := range m.cancelFuncs {
 		cancel()

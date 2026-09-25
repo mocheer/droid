@@ -3,6 +3,7 @@ package droid
 import (
 	"log"
 	"slices"
+	"time"
 
 	"github.com/mocheer/droid/pkg/gadb"
 )
@@ -15,11 +16,11 @@ type Droid struct {
 
 // New
 func New() *Droid {
-	return NewWithEmulator()
+	return NewWithDefaultEmulator()
 }
 
-// NewWithEmulator
-func NewWithEmulator() *Droid {
+// NewWithDefaultEmulator
+func NewWithDefaultEmulator() *Droid {
 	adb, err := gadb.NewClientWith("localhost")
 	if err != nil {
 		log.Println("连接错误", err)
@@ -27,10 +28,10 @@ func NewWithEmulator() *Droid {
 	return &Droid{adb: adb}
 }
 
-// FindDevice
+// FindDeviceWithSerial
 // 当 serial 为空且设备数量大于 0 时，获取第一个设备
-func (m *Droid) FindDevice(serial string) (device gadb.Device) {
-	//
+func (m *Droid) FindDeviceWithSerial(serial string) (device gadb.Device) {
+	// 检查是否有设备
 	if len(m.devices) == 0 {
 		log.Println("当前设备为空，正在重新查找设备...")
 		devices, err := m.adb.DeviceList()
@@ -56,13 +57,23 @@ func (m *Droid) FindDevice(serial string) (device gadb.Device) {
 	return device
 }
 
-// Run
-func (m *Droid) Run(options DroidRunOptions) {
+// RunWithActivityName
+func (m *Droid) RunWithActivityName(appName string, activityName string) {
+	m.RunWithOptions(DroidRunOptions{
+		Name:         appName,
+		AppName:      appName,
+		ActivityName: activityName,
+		StopInterval: time.Hour,
+	})
+}
+
+// RunWithOptions
+func (m *Droid) RunWithOptions(options DroidRunOptions) {
 	// 模拟器多开，或者有多个模拟器的情况下，这里设备可能不止一台，需要选择想要操作的设备
-	device := m.FindDevice(options.Serial)
+	device := m.FindDeviceWithSerial(options.Serial)
 	log.Println("目标模拟器：", device.Serial(), device.DeviceInfo())
 	vm := &Vm{device: device, options: options}
-	vm.Run()
+	vm.running()
 	m.vms = append(m.vms, vm)
 }
 
