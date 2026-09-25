@@ -8,39 +8,40 @@ import (
 	"github.com/mocheer/pluto/pkg/clock"
 )
 
-type Vm struct {
+type DroidVm struct {
 	device      gadb.Device
-	options     DroidRunOptions
+	options     DroidConfig
 	cancelFuncs []func()
 	stopFunc    func()
 	isRuning    bool
 }
 
-type DroidRunOptions struct {
-	Name             string // 名称
-	Serial           string // 设备序列号，为空时使用第一个设备
-	AppName          string // 应用包名
-	ActivityName     string // 应用启动的Activity名称，可为空
-	KeepAlive        bool
+type DroidConfig struct {
+	Name             string        // 名称
+	Serial           string        // 设备序列号，为空时使用第一个设备
+	AppName          string        // 应用包名
+	ActivityName     string        // 应用启动的Activity名称，可为空
+	Alive            bool          // 是否守护应用，防止因为崩溃等各种原因导致的应用关闭
 	RestartInterval  time.Duration // 启动应用，不能太低，启动应用需要时间
 	StopInterval     time.Duration //
 	SnapshotInterval time.Duration // 间隔截图，可用于分析和检测应用状态
 	SnapshotCallback func(data []byte)
 }
 
-// NewDroidRunOptions 创建默认的DroidRunOptions
-var NewDroidRunOptions = func(name string, appName string, activityName string) DroidRunOptions {
-	return DroidRunOptions{
+// NewDroidConfig 创建默认的DroidRunOptions
+var NewDroidConfig = func(name string, appName string, activityName string) DroidConfig {
+	return DroidConfig{
 		Name:            name,
 		AppName:         appName,
 		ActivityName:    activityName,
 		RestartInterval: 6 * time.Second,
 		StopInterval:    15 * time.Minute,
-		KeepAlive:       true,
+		Alive:           true,
 	}
 }
 
-func (m *Vm) StartActivity() {
+// StartActivity 启动应用
+func (m *DroidVm) StartActivity() {
 	_, err := m.device.StartWithActivity(m.options.AppName, m.options.ActivityName)
 	if err != nil {
 		log.Println("启动失败", err)
@@ -50,19 +51,15 @@ func (m *Vm) StartActivity() {
 }
 
 // 有些应用为了防止请求阻塞和卡顿问题需要间隔重启
-func (m *Vm) StopActivity() {
+func (m *DroidVm) StopActivity() {
 	m.device.StopAndClear(m.options.AppName)
 	m.isRuning = false
 	// t2 := time.Now().Unix()
 }
 
-func (m *Vm) running() {
-	// t := time.Now().Unix()
-	device := m.device
-	//
-	m.cancelFuncs = []func(){}
-	// 应用守护，防止因为崩溃等各种原因导致的应用关闭
-	if m.options.KeepAlive {
+// 应用守护，防止因为崩溃等各种原因导致的应用关闭
+func (m *DroidVm) KeepAlive() {
+	if m.options.Alive {
 		if m.options.RestartInterval == 0 {
 			m.options.RestartInterval = 5000 * time.Millisecond
 		}
@@ -71,7 +68,6 @@ func (m *Vm) running() {
 		}, m.options.RestartInterval, true)
 		m.cancelFuncs = append(m.cancelFuncs, cancel)
 	}
-
 	if m.options.StopInterval > 0 {
 		cancel := clock.SetInterval(func() {
 			log.Println("关闭应用", m.options.AppName)
@@ -79,17 +75,19 @@ func (m *Vm) running() {
 		}, m.options.StopInterval, false)
 		m.cancelFuncs = append(m.cancelFuncs, cancel)
 	}
+}
 
+func (m *DroidVm) TimeSnapshot() {
 	//
 	if m.options.SnapshotInterval > 0 {
 		cancel := clock.SetInterval(func() {
-			isStarted, err := device.IsAppStarted(m.options.AppName)
+			isStarted, err := m.device.IsAppStarted(m.options.AppName)
 			if err != nil {
 				log.Println("获取设备是否启动失败", err)
 			}
 			if isStarted {
 
-				data, err := device.Screencap()
+				data, err := m.device.Screencap()
 				if err != nil {
 					log.Println("截图错误", err)
 					return
@@ -104,9 +102,15 @@ func (m *Vm) running() {
 	}
 }
 
+func (m *DroidVm) running() {
+	m.cancelFuncs = []func(){}
+	m.KeepAlive()
+	m.TimeSnapshot()
+}
+
 // Stop
 // 停止应用
-func (m *Vm) Stop() {
+func (m *DroidVm) Stop() {
 	for _, cancel := range m.cancelFuncs {
 		cancel()
 	}

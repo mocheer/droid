@@ -11,21 +11,21 @@ import (
 type Droid struct {
 	adb     gadb.Client
 	devices []gadb.Device
-	vms     []*Vm
+	vms     []*DroidVm
 }
 
-// New
-func New() *Droid {
-	return NewWithDefaultEmulator()
-}
-
-// NewWithDefaultEmulator
-func NewWithDefaultEmulator() *Droid {
-	adb, err := gadb.NewClientWith("localhost")
+// New 创建Droid实例
+func New(host string) *Droid {
+	adb, err := gadb.NewClientWith(host)
 	if err != nil {
 		log.Println("连接错误", err)
 	}
 	return &Droid{adb: adb}
+}
+
+// NewWithDefaultEmulator
+func NewWithDefaultEmulator() *Droid {
+	return New("localhost")
 }
 
 // FindDeviceWithSerial
@@ -59,7 +59,7 @@ func (m *Droid) FindDeviceWithSerial(serial string) (device gadb.Device) {
 
 // RunWithActivityName
 func (m *Droid) RunWithActivityName(appName string, activityName string) {
-	m.RunWithOptions(DroidRunOptions{
+	m.RunWithOptions(DroidConfig{
 		Name:         appName,
 		AppName:      appName,
 		ActivityName: activityName,
@@ -68,11 +68,11 @@ func (m *Droid) RunWithActivityName(appName string, activityName string) {
 }
 
 // RunWithOptions
-func (m *Droid) RunWithOptions(options DroidRunOptions) {
+func (m *Droid) RunWithOptions(options DroidConfig) {
 	// 模拟器多开，或者有多个模拟器的情况下，这里设备可能不止一台，需要选择想要操作的设备
 	device := m.FindDeviceWithSerial(options.Serial)
 	log.Println("目标模拟器：", device.Serial(), device.DeviceInfo())
-	vm := &Vm{device: device, options: options}
+	vm := &DroidVm{device: device, options: options}
 	vm.running()
 	m.vms = append(m.vms, vm)
 }
@@ -99,7 +99,7 @@ func (m *Droid) Remove(name string) {
 	for _, vm := range m.vms {
 		if vm.options.Name == name {
 			vm.Stop()
-			m.vms = slices.DeleteFunc(m.vms, func(toDeleteVm *Vm) bool {
+			m.vms = slices.DeleteFunc(m.vms, func(toDeleteVm *DroidVm) bool {
 				return toDeleteVm == vm
 			})
 			return
